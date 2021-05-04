@@ -17,20 +17,13 @@ class MyApp extends StatelessWidget {
       theme: ThemeData.dark().copyWith(
         accentColor: primary_pink,
       ),
-
-
-
-
       initialRoute: LandingPage.id,
-
-
       routes: {
-        UnsupportedPage.id: (context)=>UnsupportedPage(),
-        LandingPage.id : (context) => LandingPage(),
-        Dashboard.id : (context) => Dashboard(),
-        Player.id : (context) => Player(songNumber: 0)
+        UnsupportedPage.id: (context) => UnsupportedPage(),
+        LandingPage.id: (context) => LandingPage(),
+        Dashboard.id: (context) => Dashboard(),
+        Player.id: (context) => Player(songNumber: 0)
       },
     );
   }
 }
-

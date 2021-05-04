@@ -1,14 +1,18 @@
 import 'dart:async';
+import 'package:audioplayers/audio_cache.dart';
+import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
 import 'package:quake/components/constants.dart';
 import 'package:quake/components/buttons.dart';
 import 'package:quake/components/music_slider.dart';
+import 'package:quake/views/widget/volume_slider.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:quake/models/quake_brain.dart';
 
 class Player extends StatefulWidget {
   static const String id = 'player';
   int songNumber;
+
   Player({@required this.songNumber});
 
   @override
@@ -17,10 +21,16 @@ class Player extends StatefulWidget {
 
 class _PlayerState extends State<Player> {
   _PlayerState({@required this.songNumber});
+
+  AudioCache audioCache = AudioCache();
+  AudioPlayer audioPlayer = AudioPlayer();
   Stopwatch stopwatch = Stopwatch();
   QuakeBrain brain = new QuakeBrain();
   int songNumber;
   bool playing = false;
+
+  double vibrationIntensity = 99;
+
   _launchURL(url) async {
     if (await canLaunch(url)) {
       await launch(url);
@@ -29,34 +39,45 @@ class _PlayerState extends State<Player> {
     }
   }
 
-  void _playAudio(){
-    brain.vibrate(startFrom: stopwatch.elapsedMilliseconds);  
+  Future<void> _playAudio() async {
+    var bytes = await (await audioCache.load(playList[songNumber].songPath))
+        .readAsBytes();
+    await audioPlayer.playBytes(bytes,
+
+        position: Duration(milliseconds: stopwatch.elapsedMilliseconds));
+    brain.vibrate(
+        startFrom: stopwatch.elapsedMilliseconds,
+        intensity: vibrationIntensity);
     stopwatch.start();
   }
 
-  void _pauseAudio(){
+  Future<void> _pauseAudio() async {
+    await audioPlayer.pause();
     brain.stopVibration();
     stopwatch.stop();
   }
 
-  void _resetAudio(){
+  Future<void> _resetAudio() async {
     brain.stopVibration();
     stopwatch.reset();
     stopwatch.stop();
+    await audioPlayer.stop();
   }
+
   @override
   void initState() {
-    Timer.periodic(Duration(milliseconds: 100), (Timer t){setState(() {});});
+    Timer.periodic(Duration(milliseconds: 100), (Timer t) {
+      setState(() {});
+    });
     super.initState();
   }
 
-  
-  String findLyrics(){
+  String findLyrics() {
     int currentTime = stopwatch.elapsedMilliseconds;
     Lyric lyric;
-    for(int i=0;i<playList[songNumber].lyrics.length;i++){
+    for (int i = 0; i < playList[songNumber].lyrics.length; i++) {
       lyric = playList[songNumber].lyrics[i];
-      if(currentTime>=lyric.start && currentTime<=lyric.end){
+      if (currentTime >= lyric.start && currentTime <= lyric.end) {
         return lyric.title;
       }
     }
@@ -70,60 +91,44 @@ class _PlayerState extends State<Player> {
 
     return SafeArea(
       child: Scaffold(
-        floatingActionButton: FloatingActionButton(
-          onPressed: (){
+        /* floatingActionButton: FloatingActionButton(
+          onPressed: () {
             _launchURL('https://www.youtube.com/watch?v=l482T0yNkeo');
           },
           backgroundColor: Colors.black12,
-          child: Image.asset('assets/images/egg.png',
-            
+          child: Image.asset(
+            'assets/images/egg.png',
           ),
-        ),
+        ),*/
         body: Stack(children: <Widget>[
-          Row(crossAxisAlignment: CrossAxisAlignment.stretch, children: <Widget>[
-            Expanded(
-              child: Container(
-                color: primary_pink,
-              ),
-            ),
-            Expanded(
-              child: Container(
-                color: primary_black,
-              ),
-            )
-          ]),
+          Row(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: <Widget>[
+                /*Expanded(
+                  child: Container(
+                    color: primary_pink,
+                  ),
+                ),*/
+                Expanded(
+                  child: Container(
+                    color: primary_black,
+                  ),
+                )
+              ]),
           Center(
               child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.start,
+            mainAxisSize: MainAxisSize.max,
             children: <Widget>[
-              Container(
-                width: 250.0,
-                height: 250.0,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  boxShadow: [
-                    BoxShadow(
-                        offset: Offset(-10.0, 10.0),
-                        color: Color(0x33000000),
-                        blurRadius: 10.0,
-                        spreadRadius: 10.0)
-                  ],
-                  image: DecorationImage(
-                    fit: BoxFit.fill,
-                    image: AssetImage("assets/images/Highway_To_Hell.jpg"),
-                  ),
-                ),
-              ),
               SizedBox(height: 20.0),
               Text(
                 songTitle,
                 style: TextStyle(
-                    fontSize: 20.0,
+                    fontSize: 30.0,
                     color: Colors.white,
                     fontFamily: 'Source Sans Pro',
                     decoration: TextDecoration.none),
               ),
-              SizedBox(height: 10.0),
               Text(
                 artistName,
                 style: TextStyle(
@@ -131,70 +136,114 @@ class _PlayerState extends State<Player> {
                     color: Colors.white,
                     decoration: TextDecoration.none),
               ),
-              SizedBox(height: 40.0),
-              Text(
-                '${((stopwatch.elapsedMilliseconds)/60000).truncate()} : ${(((stopwatch.elapsedMilliseconds)/1000).truncate()%60)}',
-                style: TextStyle(
-                    fontSize: 30.0,
-                    color: Colors.white,
-                    decoration: TextDecoration.none),
+              Expanded(
+                child: Text(
+                  findLyrics(),
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                      fontSize: 18.0,
+                      color: Colors.white,
+                      decoration: TextDecoration.none),
+                ),
               ),
-              SizedBox(height: 60.0),
-              Text(
-                findLyrics(),
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                    fontSize: 18.0,
-                    color: Colors.white,
-                    decoration: TextDecoration.none),
-                            
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                mainAxisSize: MainAxisSize.max,
+                children: [
+                  MusicSlider(
+                    progress: stopwatch.elapsedMilliseconds,
+                    trackLength: brain.getSongLength(),
+                  ),
+                  Text(
+                    printDuration(
+                        Duration(milliseconds: stopwatch.elapsedMilliseconds)),
+                    style: TextStyle(
+                        fontSize: 15.0,
+                        color: Colors.white,
+                        decoration: TextDecoration.none),
+                  ),
+                ],
               ),
-              SizedBox(height: 60.0),
               Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: <Widget>[
                     GestureDetector(
-                      onTap:(){
-                        setState(() {
-                          playing=!playing;
-                          playing?_playAudio():_pauseAudio();
-                        });
-                      },
-                      child:playing
-                        ? PauseButton(
-                          onPress: null,
-                        )
-                        : PlayButton(
-                          onPress: null,
-                        )
-                    ),
-                    GestureDetector(
-                      onTap:  (){
+                        onTap: () async {
                           setState(() {
-                            playing = false;
-                            _resetAudio();
+                            playing = !playing;
                           });
+
+                          if (playing)
+                            await _playAudio();
+                          else
+                            await _pauseAudio();
                         },
+                        child: playing
+                            ? PauseButton(
+                                onPress: null,
+                              )
+                            : PlayButton(
+                                onPress: null,
+                              )),
+                    GestureDetector(
+                      onTap: () async {
+                        setState(() {
+                          playing = false;
+                        });
+                        await _resetAudio();
+                      },
                       child: ResetButton(),
                     )
-                
                   ]),
-              SizedBox(height: 60.0),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: <Widget>[
-                  MusicSlider(
-                    progress: stopwatch.elapsedMilliseconds,
-                    trackLength: brain.getSongLength(),
-                  )
-
-                ]
-              ),
+              Container(height: 40),
+              getLiveControls(),
+              Container(height: 20),
             ],
           )),
-          
         ]),
       ),
+    );
+  }
+
+  getLiveControls() {
+    return Column(
+      children: [
+        Text("Live controls"),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisSize: MainAxisSize.max,
+          children: [
+            Icon(Icons.volume_down_rounded),
+            VolumeSlider(
+              display: Display.HORIZONTAL,
+              sliderActiveColor: Colors.blue,
+              sliderInActiveColor: Colors.grey,
+            ),
+            Icon(Icons.volume_up_rounded),
+          ],
+        ),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisSize: MainAxisSize.max,
+          children: [
+            Icon(Icons.phone_android_sharp),
+            Slider(
+              onChanged: (double value) async {
+                vibrationIntensity = value;
+
+                if (playing) {
+                  await _pauseAudio();
+                  await _playAudio();
+                }
+              },
+              value: vibrationIntensity,
+              max: 100,
+              min: 0,
+            ),
+            Icon(Icons.vibration_rounded),
+          ],
+        ),
+      ],
     );
   }
 }

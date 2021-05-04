@@ -20,8 +20,9 @@ dependencies:
   flutter:
     sdk: flutter
   vibration: ^1.2.4
-  audioplayers: ^0.15.1
+  audioplayers: ^0.18.3
   url_launcher: ^5.4.5
+  flutter_volume_slider: ^1.0.6
   
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
@@ -46,6 +47,8 @@ flutter:
   assets:
     - assets/images/
     - assets/waveforms/
+    - assets/songs/
+    - assets/songs/highway.mp3
 
 
   fonts:
