@@ -60,12 +60,12 @@ class QuakeBrain {
       }
 
       int i = 0;
-      print("Before: $_songPattern");
+      //print("Before: $_songPattern");
       for (int value in _songPattern) {
         _songPattern[i] = (value * intensity ~/ 100);
         i++;
       }
-      print("After: $_songPattern");
+      //print("After: $_songPattern");
 
       if (!_songPattern.every((element) => element == 0))
         Vibration.vibrate(pattern: _songPattern);
