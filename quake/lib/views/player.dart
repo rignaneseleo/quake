@@ -30,6 +30,7 @@ class _PlayerState extends State<Player> {
   bool playing = false;
 
   double vibrationIntensity = 99;
+  double offset = 0;
 
   _launchURL(url) async {
     if (await canLaunch(url)) {
@@ -43,8 +44,8 @@ class _PlayerState extends State<Player> {
     var bytes = await (await audioCache.load(playList[songNumber].songPath))
         .readAsBytes();
     await audioPlayer.playBytes(bytes,
-
-        position: Duration(milliseconds: stopwatch.elapsedMilliseconds));
+        position: Duration(
+            milliseconds: stopwatch.elapsedMilliseconds + offset.toInt()));
     brain.vibrate(
         startFrom: stopwatch.elapsedMilliseconds,
         intensity: vibrationIntensity);
@@ -136,16 +137,18 @@ class _PlayerState extends State<Player> {
                     color: Colors.white,
                     decoration: TextDecoration.none),
               ),
-              Expanded(
-                child: Text(
-                  findLyrics(),
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                      fontSize: 18.0,
-                      color: Colors.white,
-                      decoration: TextDecoration.none),
+              Expanded(child: Container()),
+              Text(
+                findLyrics(),
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 22.0,
+                  color: Colors.orangeAccent,
+                  decoration: TextDecoration.none,
+                  fontStyle: FontStyle.italic,
                 ),
               ),
+              Expanded(child: Container()),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 mainAxisSize: MainAxisSize.max,
@@ -241,6 +244,23 @@ class _PlayerState extends State<Player> {
               min: 0,
             ),
             Icon(Icons.vibration_rounded),
+          ],
+        ),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisSize: MainAxisSize.max,
+          children: [
+            Slider(
+              onChanged: (double value) async {
+                setState(() {
+                  offset = value;
+                });
+              },
+              value: offset,
+              max: 2000,
+              min: 0,
+            ),
+            Text(offset.toInt().toString()),
           ],
         ),
       ],
