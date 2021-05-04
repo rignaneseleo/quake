@@ -1,13 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:quake/components/constants.dart';
 
-
 class PlayButton extends StatelessWidget {
-
   Function onPress;
 
   PlayButton({@required this.onPress});
- 
+
   @override
   Widget build(BuildContext context) {
     return RawMaterialButton(
@@ -26,7 +24,6 @@ class PlayButton extends StatelessWidget {
 }
 
 class PauseButton extends StatelessWidget {
-
   Function onPress;
 
   PauseButton({@required this.onPress});
@@ -48,13 +45,9 @@ class PauseButton extends StatelessWidget {
   }
 }
 
-
 class ResetButton extends StatelessWidget {
+  ResetButton();
 
-  Function onPress;
-
-  ResetButton({@required this.onPress});
- 
   @override
   Widget build(BuildContext context) {
     return RawMaterialButton(
