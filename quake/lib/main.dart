@@ -2,8 +2,7 @@ import 'package:flutter/material.dart';
 import 'components/constants.dart';
 import 'views/landing_page.dart';
 import 'views/dashboard.dart';
-import 'views/player.dart';
-import 'views/unsupported_page.dart';
+import 'views/player_page.dart';
 
 void main() => runApp(MyApp());
 
@@ -13,16 +12,14 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'Quake',
+      title: 'Music to vibration',
       theme: ThemeData.dark().copyWith(
         accentColor: primary_pink,
       ),
       initialRoute: LandingPage.id,
       routes: {
-        UnsupportedPage.id: (context) => UnsupportedPage(),
         LandingPage.id: (context) => LandingPage(),
         Dashboard.id: (context) => Dashboard(),
-        Player.id: (context) => Player(songNumber: 0)
       },
     );
   }

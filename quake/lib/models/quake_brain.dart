@@ -2,53 +2,57 @@ import 'package:quake/models/waveform_data_model.dart';
 import 'package:vibration/vibration.dart';
 import 'package:quake/helpers/waveform_data_loader.dart';
 import 'package:quake/components/constants.dart';
+import 'dart:math' as math;
 
 class QuakeBrain {
+  Song song;
+
   WaveformData _wave;
   List<int> _songPattern = [];
   List<int> _intensityPattern = [];
-  static const _songLength = 212874;
 
-  QuakeBrain() {
-    _initialize();
-  }
+  QuakeBrain({this.song});
 
   int getSongLength() {
-    return _songLength;
+    return _wave.length;
   }
 
-  void _initialize() async {
-    _wave = await loadWaveformData("assets/waveforms/HighWayToHell.json");
+  Future initialize() async {
+    _wave = await loadWaveformData(song.songBeatsPath);
   }
 
-  bool _shouldPlay(double dataPoint) {
+  bool _shouldPlay(double dataPoint, double threshold) {
+    if (threshold == null || threshold == 0) threshold = kThreshold;
     return dataPoint.abs() >= threshold;
   }
 
-  void vibrate({int startFrom, double intensity}) async {
+  void vibrate({int startFrom, double intensity, double threshold}) async {
+    if (intensity <= 0) return;
+
     int startingDataPoint = (startFrom / durationOfDatapoint).round();
     _songPattern.clear();
     _intensityPattern.clear();
     if (await Vibration.hasVibrator()) {
       List<double> dataPoints = _wave.scaledData();
       int countPlaying = 0;
-      int countDelaying = 0;
+      int countDelays = 0;
 
       for (int i = startingDataPoint; i < dataPoints.length; i += 2) {
-        countDelaying = 0;
-        while (!_shouldPlay(dataPoints[i])) {
-          countDelaying += durationOfDatapoint;
+        countDelays = 0;
+        while (!_shouldPlay(dataPoints[i], threshold)) {
+          countDelays += durationOfDatapoint;
           i += 2;
           if (i >= dataPoints.length) {
             break;
           }
         }
-        _songPattern.add(countDelaying);
+        _songPattern.add(countDelays);
         if (i >= dataPoints.length) {
           break;
         }
+
         countPlaying = 0;
-        while (_shouldPlay(dataPoints[i])) {
+        while (_shouldPlay(dataPoints[i], threshold)) {
           countPlaying += durationOfDatapoint;
           i += 2;
           if (i >= dataPoints.length) {
@@ -56,19 +60,22 @@ class QuakeBrain {
           }
         }
         _songPattern.add(countPlaying);
-        _intensityPattern.add((dataPoints[i - 1].abs() * 255).round());
+        // _intensityPattern.add((dataPoints[i - 1].abs() * 255).round());
       }
+/*
+      for (int i = startingDataPoint; i < dataPoints.length; i+=2) {
+        _intensityPattern.add((dataPoints[i].abs() * 255).round());
+      }*/
 
-      int i = 0;
-      //print("Before: $_songPattern");
-      for (int value in _songPattern) {
-        _songPattern[i] = (value * intensity ~/ 100);
-        i++;
-      }
-      //print("After: $_songPattern");
+      int max = _songPattern.reduce(math.max);
 
-      if (!_songPattern.every((element) => element == 0))
-        Vibration.vibrate(pattern: _songPattern);
+      Vibration.vibrate(
+        pattern: _songPattern,
+        intensities: _songPattern
+            .map((e) => e.abs() * (255 * intensity / 100) ~/ max)
+            .toList(),
+        //amplitude: 1,
+      );
     }
   }
 

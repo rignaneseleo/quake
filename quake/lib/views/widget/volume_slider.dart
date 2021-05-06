@@ -66,7 +66,6 @@ class _VolumeSliderState extends State<VolumeSlider> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Container(
-                  width: 175,
                   child: Slider(
                     activeColor: widget.sliderActiveColor != null
                         ? widget.sliderActiveColor

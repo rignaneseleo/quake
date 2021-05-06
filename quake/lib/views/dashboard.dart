@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'pageone.dart';
+import 'home_page.dart';
 
 class Dashboard extends StatefulWidget {
   static const String id = 'dashboard';
@@ -9,7 +9,7 @@ class Dashboard extends StatefulWidget {
 }
 
 class _DashboardState extends State<Dashboard> {
-  List<Widget> pages = [PageOne()];
+  List<Widget> pages = [HomePage()];
 
   @override
   Widget build(BuildContext context) {
