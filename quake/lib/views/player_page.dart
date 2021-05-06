@@ -121,6 +121,8 @@ class _PlayerPageState extends State<PlayerPage> {
   }
 
   String findLyrics() {
+    if (playList[songNumber].lyrics.length == 0) return "";
+
     int currentTime = stopwatch.elapsedMilliseconds;
     Lyric lyric;
     for (int i = 0; i < playList[songNumber].lyrics.length; i++) {
@@ -129,6 +131,7 @@ class _PlayerPageState extends State<PlayerPage> {
         return lyric.title;
       }
     }
+
     return '...';
   }
 
