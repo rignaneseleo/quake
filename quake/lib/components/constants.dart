@@ -108,6 +108,7 @@ List<Song> playList = [
       songBeatsPath: 'assets/waveforms/dust.json',
       lyrics: [],
       offset: -8,
+      threshold: 0.14,
       imageUrl:
           "https://cdns-images.dzcdn.net/images/cover/8b8fc5d117f9357b79f0a0a410a170e8/500x500-000000-80-0-0.jpg"),
   Song(

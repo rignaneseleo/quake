@@ -71,9 +71,9 @@ class QuakeBrain {
 
       Vibration.vibrate(
         pattern: _songPattern,
-        intensities: _songPattern
+        /*intensities: _songPattern
             .map((e) => e.abs() * (255 * intensity / 100) ~/ max)
-            .toList(),
+            .toList(),*/
         //amplitude: 1,
       );
     }
