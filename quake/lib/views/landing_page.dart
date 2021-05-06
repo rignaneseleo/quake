@@ -24,7 +24,7 @@ class _LandingPageState extends State<LandingPage> {
       body: Container(
         color: Color(0xFF101010),
         child: Center(
-          child: Text("Music to Vibration"),
+          child: Text("Feel the music",style: TextStyle(fontSize: 30),),
         ),
       ),
     );

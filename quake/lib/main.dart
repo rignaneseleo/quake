@@ -12,7 +12,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'Music to vibration',
+      title: 'Feel the music APP',
       theme: ThemeData.dark().copyWith(
         accentColor: primary_pink,
       ),
