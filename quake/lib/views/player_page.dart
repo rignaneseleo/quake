@@ -135,9 +135,21 @@ class _PlayerPageState extends State<PlayerPage> {
   @override
   Widget build(BuildContext context) {
     if (!isReady)
-      return Center(
-        child: CircularProgressIndicator(),
-      );
+      return Scaffold(
+          body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisSize: MainAxisSize.max,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            CircularProgressIndicator(),
+            Padding(
+              padding: const EdgeInsets.all(15.0),
+              child: Text("The song is loading..."),
+            ),
+          ],
+        ),
+      ));
 
     String songTitle = playList[songNumber].songName;
     String artistName = playList[songNumber].artistName;
